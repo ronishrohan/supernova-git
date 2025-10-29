@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import Sidebar from './Sidebar'
+import icon from '../../assets/images/icon.png'
 
 interface TitlebarProps {
   children: React.ReactNode
@@ -45,7 +46,8 @@ const Titlebar: React.FC<TitlebarProps> = ({ children }) => {
           } as React.CSSProperties
         }
       >
-        <div className="flex items-center flex-1 pl-3">
+        <div className="flex items-center flex-1 gap-2 pl-2">
+          <img src={icon} className="size-[20px] rounded-sm" />
           <div className=" text-white font-logo text-xl font-light translate-y-[1px]">SUPERNOVA</div>
         </div>
 

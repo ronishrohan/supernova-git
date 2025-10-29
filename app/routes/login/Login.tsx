@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom'
 import { useAuthStore } from '../../store/authStore'
 import backdrop from '../../assets/images/backdrop.png'
 
+import logo_large from '../../assets/images/icon-large.png'
+
 export default function Login() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -17,8 +19,11 @@ export default function Login() {
 
   return (
     <div className="size-full gap-2 flex">
-      <div className="p-4 flex flex-col w-1/2 items-center justify-start py-[100px] gap-2">
+      <div className="p-4 flex flex-col w-1/2 items-center justify-start py-[40px] gap-2">
         <div className=" flex flex-col gap-2 items-stretch">
+          <div className="w-full h-fit mb-4">
+            <img src={logo_large} className="w-full h-fit rounded-lg mix-blend-lighten" />
+          </div>
           <div className="text-center text-4xl leading-[20px] font-logo font-light tracking-tighter">SUPERNOVA</div>
           <div className="text-center text-gray-600 mb-4">AI powered security</div>
           <form onSubmit={handleLogin} className="flex flex-col gap-2">
