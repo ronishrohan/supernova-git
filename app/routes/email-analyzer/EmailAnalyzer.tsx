@@ -1,11 +1,18 @@
 import React, { useState } from 'react'
 import { Mail, Shield, AlertTriangle, CheckCircle, Activity, Upload, FileText } from 'lucide-react'
+import { useConveyor } from '@/app/hooks/use-conveyor'
+
+interface EmailIndicator {
+  name: string
+  severity: 'safe' | 'low' | 'medium' | 'high' | 'critical'
+  description: string
+}
 
 interface AnalysisResult {
   isScam: boolean
   probability: number
   riskLevel: 'safe' | 'low' | 'medium' | 'high' | 'critical'
-  indicators: string[]
+  indicators: EmailIndicator[]
   verdict: string
   timestamp: string
 }
@@ -14,75 +21,20 @@ export default function EmailAnalyzer() {
   const [emailContent, setEmailContent] = useState('')
   const [loading, setLoading] = useState(false)
   const [result, setResult] = useState<AnalysisResult | null>(null)
+  const conveyor = useConveyor()
 
   const analyzeEmail = async () => {
     if (!emailContent.trim()) return
 
     setLoading(true)
 
-    // Simulate API call delay
-    await new Promise((resolve) => setTimeout(resolve, 2000))
-
-    // Generate random probability (for now)
-    const probability = Math.random() * 100
-    const isScam = probability > 50
-
-    // Determine risk level based on probability
-    let riskLevel: 'safe' | 'low' | 'medium' | 'high' | 'critical'
-    if (probability < 20) riskLevel = 'safe'
-    else if (probability < 40) riskLevel = 'low'
-    else if (probability < 60) riskLevel = 'medium'
-    else if (probability < 80) riskLevel = 'high'
-    else riskLevel = 'critical'
-
-    // Generate random indicators
-    const allIndicators = [
-      'Sender email address is suspicious',
-      'Email contains urgent language',
-      'Multiple spelling and grammar errors detected',
-      'Suspicious links detected in email body',
-      'Sender domain does not match claimed organization',
-      'Email requests personal information',
-      'Contains unusual attachments',
-      'Email header analysis shows inconsistencies',
-      'Sender has good reputation',
-      'Email passes SPF and DKIM checks',
-      'No suspicious URLs detected',
-      'Professional language and formatting',
-      'Legitimate company domain verified',
-      'No sense of urgency or threats'
-    ]
-
-    const numIndicators = Math.floor(Math.random() * 5) + 3
-    const indicators: string[] = []
-    const usedIndices = new Set<number>()
-
-    while (indicators.length < numIndicators) {
-      const index = Math.floor(Math.random() * allIndicators.length)
-      if (!usedIndices.has(index)) {
-        indicators.push(allIndicators[index])
-        usedIndices.add(index)
-      }
+    try {
+      const analysis = await conveyor.security.analyzeEmailContent(emailContent)
+      setResult(analysis)
+    } catch (error) {
+      console.error('Email analysis error:', error)
+      // Show error or fallback
     }
-
-    // Generate verdict
-    let verdict = ''
-    if (riskLevel === 'safe' || riskLevel === 'low') {
-      verdict = 'This email appears to be legitimate.'
-    } else if (riskLevel === 'medium') {
-      verdict = 'This email shows some suspicious characteristics. Exercise caution.'
-    } else {
-      verdict = 'This email is highly likely to be a scam. Do not respond or click any links.'
-    }
-
-    setResult({
-      isScam,
-      probability: Math.round(probability),
-      riskLevel,
-      indicators,
-      verdict,
-      timestamp: new Date().toISOString()
-    })
 
     setLoading(false)
   }
@@ -235,26 +187,36 @@ export default function EmailAnalyzer() {
             <div className="bg-card border border-border p-6">
               <h3 className="text-lg font-light mb-4">Email Analysis Indicators</h3>
               <div className="space-y-2">
-                {result.indicators.map((indicator, index) => (
-                  <div
-                    key={index}
-                    className="flex items-start gap-3 p-3 bg-background border border-border"
-                  >
-                    <div className="mt-0.5">
-                      {indicator.toLowerCase().includes('suspicious') ||
-                      indicator.toLowerCase().includes('error') ||
-                      indicator.toLowerCase().includes('urgent') ||
-                      indicator.toLowerCase().includes('inconsisten') ||
-                      indicator.toLowerCase().includes('unusual') ||
-                      indicator.toLowerCase().includes('not match') ? (
-                        <AlertTriangle size={16} className="text-orange-500" />
-                      ) : (
-                        <CheckCircle size={16} className="text-green-500" />
-                      )}
+                {result.indicators.map((indicator, index) => {
+                  const getIndicatorIcon = (severity: string) => {
+                    switch (severity) {
+                      case 'safe':
+                        return <CheckCircle size={16} className="text-green-500" />
+                      case 'low':
+                        return <CheckCircle size={16} className="text-blue-500" />
+                      case 'medium':
+                        return <Shield size={16} className="text-yellow-500" />
+                      case 'high':
+                      case 'critical':
+                        return <AlertTriangle size={16} className="text-orange-500" />
+                      default:
+                        return <Shield size={16} className="text-gray-500" />
+                    }
+                  }
+
+                  return (
+                    <div
+                      key={index}
+                      className="flex items-start gap-3 p-3 bg-background border border-border"
+                    >
+                      <div className="mt-0.5">{getIndicatorIcon(indicator.severity)}</div>
+                      <div className="flex-1">
+                        <div className="text-sm font-medium text-gray-200 mb-1">{indicator.name}</div>
+                        <div className="text-xs text-gray-400">{indicator.description}</div>
+                      </div>
                     </div>
-                    <span className="text-sm text-gray-300">{indicator}</span>
-                  </div>
-                ))}
+                  )
+                })}
               </div>
             </div>
 

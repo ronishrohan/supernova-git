@@ -469,6 +469,27 @@ export const networkIpcSchema = {
   }
 }
 
+// Email Analyzer schemas
+export const emailAnalyzerIpcSchema = {
+  'email-analyzer-analyze': {
+    args: z.tuple([z.string()]),
+    return: z.object({
+      isScam: z.boolean(),
+      probability: z.number(),
+      riskLevel: z.enum(['safe', 'low', 'medium', 'high', 'critical']),
+      indicators: z.array(
+        z.object({
+          name: z.string(),
+          severity: z.enum(['safe', 'low', 'medium', 'high', 'critical']),
+          description: z.string()
+        })
+      ),
+      verdict: z.string(),
+      timestamp: z.string()
+    })
+  }
+}
+
 // Auth schemas
 export const authIpcSchema = {
   'auth-register': {

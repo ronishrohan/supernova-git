@@ -17,6 +17,8 @@ import {
 
 import { analyzeEmail } from '@/lib/backend/modules/phishing'
 
+import { analyzeEmail as analyzeEmailContent } from '@/lib/backend/modules/email-analyzer'
+
 import {
   askSecurityAssistant,
   getAvailableTopics,
@@ -93,6 +95,11 @@ export const registerSecurityHandlers = () => {
   // Phishing handlers
   handle('phishing-analyze', async (text: string) => {
     return await analyzeEmail(text)
+  })
+
+  // Email Analyzer handlers
+  handle('email-analyzer-analyze', async (emailContent: string) => {
+    return await analyzeEmailContent(emailContent)
   })
 
   // AI Advisor handlers

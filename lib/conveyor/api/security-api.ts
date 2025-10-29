@@ -21,6 +21,9 @@ export class SecurityApi extends ConveyorApi {
   // Phishing methods
   analyzeEmail = (text: string) => this.invoke('phishing-analyze', text)
 
+  // Email Analyzer methods
+  analyzeEmailContent = (emailContent: string) => this.invoke('email-analyzer-analyze', emailContent)
+
   // AI Advisor methods
   askAdvisor = (query: string) => this.invoke('advisor-ask', query)
 

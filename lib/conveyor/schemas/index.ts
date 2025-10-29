@@ -10,7 +10,8 @@ import {
   reputationIpcSchema,
   dashboardIpcSchema,
   networkIpcSchema,
-  authIpcSchema
+  authIpcSchema,
+  emailAnalyzerIpcSchema
 } from './security-schema'
 
 // Define all IPC channel schemas in one place
@@ -25,7 +26,8 @@ export const ipcSchemas = {
   ...reputationIpcSchema,
   ...dashboardIpcSchema,
   ...networkIpcSchema,
-  ...authIpcSchema
+  ...authIpcSchema,
+  ...emailAnalyzerIpcSchema
 } as const
 
 // Extract types from Zod schemas

@@ -41,7 +41,7 @@ export default function Sidebar() {
           <motion.div
             initial={{ width: 0 }}
             animate={{ width: 60 }}
-            exit={{ width: 0}}
+            exit={  { width: 0}}
             className=" h-full flex shrink-0 flex-col overflow-hidden bg-card border-r border-border"
           >
             <div className='w-[60px] h-full flex flex-col shrink-0'>
