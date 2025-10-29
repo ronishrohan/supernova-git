@@ -45,7 +45,7 @@ const Titlebar: React.FC<TitlebarProps> = ({ children }) => {
         }
       >
         <div className="flex items-center flex-1 pl-3">
-          <div className="text-xs font-medium text-muted-foreground">Supernova</div>
+          <div className=" text-white font-logo text-xl font-light translate-y-[1px]">SUPERNOVA</div>
         </div>
 
         {platform !== 'darwin' && (
