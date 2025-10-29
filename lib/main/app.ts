@@ -17,6 +17,7 @@ export function createAppWindow(): void {
     backgroundColor: '#1c1c1c',
     icon: appIcon,
     frame: false,
+    transparent: true,
     titleBarStyle: 'hiddenInset',
     title: 'Electron React App',
     maximizable: false,
