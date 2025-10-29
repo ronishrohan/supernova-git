@@ -17,7 +17,7 @@ CREATE TABLE IF NOT EXISTS auth_data (
 -- Vault Data Table
 CREATE TABLE IF NOT EXISTS vault_data (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-  user_id TEXT NOT NULL,
+  user_id TEXT NOT NULL UNIQUE,
   encrypted_data TEXT NOT NULL,
   iv TEXT NOT NULL,
   auth_tag TEXT NOT NULL,

@@ -1,4 +1,4 @@
-
+import { GoogleGenerativeAI } from '@google/generative-ai'
 
 export interface SecurityResponse {
   query: string
@@ -7,6 +7,8 @@ export interface SecurityResponse {
   confidence: number
   relatedTopics: string[]
   sources?: string[]
+  // Response format: 'text' or 'markdown'
+  format?: 'text' | 'markdown'
 }
 
 // Knowledge base of security topics and responses
@@ -386,45 +388,50 @@ function findBestMatch(query: string): {
 }
 
 /**
- * ⚠️ LLM API PLACEHOLDER ⚠️
- *
- * This is where you can integrate an LLM API (OpenAI, Anthropic, etc.)
- * for more sophisticated and context-aware responses.
- *
- * Example integration:
- * ```typescript
- * import { OpenAI } from 'openai'
- *
- * async function queryLLM(query: string) {
- *   const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
- *
- *   const response = await openai.chat.completions.create({
- *     model: 'gpt-4',
- *     messages: [
- *       {
- *         role: 'system',
- *         content: 'You are a cybersecurity expert assistant. Provide accurate, helpful security advice.'
- *       },
- *       { role: 'user', content: query }
- *     ]
- *   })
- *
- *   return response.choices[0].message.content
- * }
- * ```
+ * Google Gemini API Integration
  */
 async function queryLLMAPI(query: string): Promise<string | null> {
-  // TODO: Integrate your LLM API here
-  // Example:
-  // try {
-  //   const response = await yourLLMClient.complete(query)
-  //   return response.text
-  // } catch (error) {
-  //   console.error('LLM API error:', error)
-  //   return null
-  // }
+  try {
+    const apiKey = "AIzaSyBt-AEd1VmqH7SmG1m1ulJcMmHBbryt89Y"
 
-  return null // Return null to use knowledge base fallback
+    // If apiKey is falsy we cannot call Gemini; return null so caller can handle it.
+    if (!apiKey) {
+      console.log('Gemini API key is empty — cannot call Gemini')
+      return null
+    }
+
+    // Initialize Gemini with the provided API key
+    const genAI = new GoogleGenerativeAI(apiKey)
+    const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' })
+
+    // Create system prompt for cybersecurity expertise
+    const systemPrompt = `You are an expert cybersecurity advisor. Your role is to provide accurate, helpful, and actionable security advice.
+
+Guidelines:
+- Be concise and practical
+- Use bullet points and clear formatting
+- Provide step-by-step instructions when relevant
+- Mention specific tools and best practices
+- Warn about common pitfalls
+- Keep responses focused and professional
+- Use emojis sparingly for visual clarity (🚩, ✓, etc.)
+
+Answer the following security question:`
+
+    const fullPrompt = `${systemPrompt}\n\n${query}`
+
+    // Generate response
+    const result = await model.generateContent(fullPrompt)
+    const response = await result.response
+    const text = response.text()
+
+    console.log('Gemini returned a response (length:', (text || '').length, ')')
+
+    return text
+  } catch (error) {
+    console.error('Gemini API error:', error)
+    return null // Fall back to knowledge base
+  }
 }
 
 /**
@@ -474,8 +481,7 @@ For specific questions, try asking about:
 - Malware defense
 - Data encryption
 - Two-factor authentication
-
-Would you like more information on any of these topics?`
+`
 
   return {
     query,
@@ -502,7 +508,9 @@ Would you like more information on any of these topics?`
  * 3. Provide general security advice if no match found
  */
 export async function askSecurityAssistant(query: string): Promise<SecurityResponse> {
-  // Try LLM API first
+  // Strict LLM-only mode: call Gemini and return its response. Do not attempt
+  // knowledge-base or fallback matching — the caller requested direct Gemini
+  // responses only.
   const llmResponse = await queryLLMAPI(query)
 
   if (llmResponse) {
@@ -512,19 +520,21 @@ export async function askSecurityAssistant(query: string): Promise<SecurityRespo
       category: 'AI Generated',
       confidence: 95,
       relatedTopics: [],
-      sources: ['AI Language Model']
+      sources: ['AI Language Model'],
+      format: 'markdown'
     }
   }
 
-  // Fall back to knowledge base
-  const match = findBestMatch(query)
-
-  if (match) {
-    return generateKnowledgeBaseResponse(query, match.topic, match.confidence)
+  // If Gemini fails, return an explicit LLM-unavailable response so the
+  // caller knows why no AI answer was produced.
+  return {
+    query,
+    answer: 'Gemini AI unavailable or returned no response. Please check the API key and network connectivity.',
+    category: 'AI Generated',
+    confidence: 0,
+    relatedTopics: [],
+    sources: []
   }
-
-  // No match found - provide general advice
-  return generateFallbackResponse(query)
 }
 
 /**

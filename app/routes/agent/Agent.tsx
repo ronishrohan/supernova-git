@@ -1,11 +1,12 @@
 import React, { useState } from 'react'
+import ReactMarkdown from 'react-markdown'
 import { Sparkles, Send, Loader2, Lightbulb } from 'lucide-react'
 import { useConveyor } from '../../hooks/use-conveyor'
 
 export default function Agent() {
   const conveyor = useConveyor('security')
   const [message, setMessage] = useState('')
-  const [messages, setMessages] = useState<Array<{ role: string; content: string; category?: string; confidence?: number }>>([
+  const [messages, setMessages] = useState<Array<{ role: string; content: string; category?: string; confidence?: number; format?: 'text' | 'markdown' }>>([
     { role: 'assistant', content: 'Hello! I\'m your AI security assistant. Ask me about Wi-Fi security, passwords, phishing, VPNs, malware, encryption, and more!' },
   ])
   const [loading, setLoading] = useState(false)
@@ -40,8 +41,9 @@ export default function Agent() {
         {
           role: 'assistant',
           content: response.answer,
-          category: response.category,
-          confidence: response.confidence
+            category: response.category,
+            confidence: response.confidence,
+            format: (response as any).format || 'text'
         }
       ])
     } catch (error) {
@@ -65,17 +67,17 @@ export default function Agent() {
 
   return (
     <div className="size-full p-6 flex flex-col">
-      <div className="flex justify-between items-center mb-8">
+      <div className="flex sticky top-[20px] justify-between items-center mb-8">
         <div>
           <h1 className="text-3xl font-logo font-light tracking-tighter">AI Security Advisor</h1>
           <p className="text-gray-600">Get expert cybersecurity guidance and tips</p>
         </div>
       </div>
 
-      <div className="flex-1 max-w-5xl mx-auto w-full flex gap-6">
+      <div className="flex-1 max-w-5xl  mx-auto w-full flex gap-6">
         {/* Chat Area */}
-        <div className="flex-1 flex flex-col gap-4">
-          <div className="flex-1 bg-card border border-border p-6 overflow-auto">
+        <div className=" flex h-[calc(100vh-120px)] sticky top-[100px] flex-col gap-4">
+          <div className="bg-card  h-[calc(100vh-220px)] border border-border p-6 overflow-auto">
             <div className="flex flex-col gap-4">
               {messages.map((msg, idx) => (
                 <div
@@ -94,7 +96,13 @@ export default function Agent() {
                         : 'bg-accent/20 border border-border'
                     }`}
                   >
-                    <div className="whitespace-pre-wrap">{msg.content}</div>
+                    {msg.format === 'markdown' ? (
+                      <div style={{ fontFamily: 'inherit', fontSize: 'inherit' }} className="markdown-content">
+                        <ReactMarkdown>{msg.content || ''}</ReactMarkdown>
+                      </div>
+                    ) : (
+                      <ReactMarkdown >{msg.content}</ReactMarkdown>
+                    )}
                     {msg.category && (
                       <div className="mt-2 pt-2 border-t border-border/30 text-xs text-gray-500">
                         Category: {msg.category} • Confidence: {Math.round(msg.confidence || 0)}%
@@ -137,7 +145,7 @@ export default function Agent() {
         </div>
 
         {/* Sidebar */}
-        <div className="w-80 space-y-4">
+        <div className="w-[200px] shrink-0 space-y-4">
           {/* Quick Questions */}
           <div className="bg-card border border-border p-4">
             <h3 className="text-sm font-medium mb-3 flex items-center gap-2">

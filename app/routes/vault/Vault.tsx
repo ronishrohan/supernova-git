@@ -48,12 +48,12 @@ export default function Vault() {
 
   const handleUnlock = async () => {
     if (!masterPassword) {
-      alert('Please enter master password')
+      console.log('Please enter master password')
       return
     }
 
     if (masterPassword.length < 8) {
-      alert('Password must be at least 8 characters')
+      console.log('Password must be at least 8 characters')
       return
     }
 
@@ -62,14 +62,14 @@ export default function Vault() {
       // If registering, create new master password
       if (isRegistering) {
         if (!isAuthenticated || !user?.id) {
-          alert('You must be signed in to register a master password')
+          console.log('You must be signed in to register a master password')
           setLoading(false)
           return
         }
 
         const registerResult = await conveyor.registerMasterPassword(user.id, masterPassword)
         if (!registerResult.success) {
-          alert(registerResult.message)
+          console.log(registerResult.message)
           setLoading(false)
           return
         }
@@ -79,18 +79,18 @@ export default function Vault() {
         setEntries([])
         setIsUnlocked(true)
         setBlockchainVerified(true)
-        alert('Master password registered successfully! Vault is ready to use.')
+        console.log('Master password registered successfully! Vault is ready to use.')
       } else {
         // Verify existing master password
         if (!isAuthenticated || !user?.id) {
-          alert('You must be signed in to verify master password')
+          console.log('You must be signed in to verify master password')
           setLoading(false)
           return
         }
 
         const verifyResult = await conveyor.verifyMasterPassword(user.id, masterPassword)
         if (!verifyResult.success) {
-          alert(verifyResult.message)
+          console.log(verifyResult.message)
           setLoading(false)
           return
         }
@@ -102,13 +102,13 @@ export default function Vault() {
         if (result.success) {
           setEntries(result.entries)
           setIsUnlocked(true)
-          alert(`Vault unlocked! ${result.entries.length} entries loaded.`)
+          console.log(`Vault unlocked! ${result.entries.length} entries loaded.`)
         } else {
-          alert(result.message)
+          console.log(result.message)
         }
       }
     } catch (error) {
-      alert('Failed to unlock vault: ' + (error instanceof Error ? error.message : 'Unknown error'))
+      console.log('Failed to unlock vault: ' + (error instanceof Error ? error.message : 'Unknown error'))
     } finally {
       setLoading(false)
     }
@@ -126,7 +126,7 @@ export default function Vault() {
     setLoading(true)
     try {
       if (!isAuthenticated || !user?.id) {
-        alert('You must be signed in to save the vault')
+        console.log('You must be signed in to save the vault')
         setLoading(false)
         return
       }
@@ -134,12 +134,12 @@ export default function Vault() {
       const result = await conveyor.saveVault(user.id, masterPassword, entries)
       if (result.success) {
         setBlockchainVerified(result.blockchainProof?.stored || false)
-        alert('Vault saved and verified on blockchain!')
+        console.log('Vault saved and verified on blockchain!')
       } else {
-        alert('Failed to save: ' + result.message)
+        console.log('Failed to save: ' + result.message)
       }
     } catch (error) {
-      alert('Save error: ' + (error instanceof Error ? error.message : 'Unknown error'))
+      console.log('Save error: ' + (error instanceof Error ? error.message : 'Unknown error'))
     } finally {
       setLoading(false)
     }
@@ -147,14 +147,14 @@ export default function Vault() {
 
   const handleAddEntry = async () => {
     if (!newEntry.site || !newEntry.username || !newEntry.password) {
-      alert('Please fill in all required fields')
+      console.log('Please fill in all required fields')
       return
     }
 
     setLoading(true)
     try {
       if (!isAuthenticated || !user?.id) {
-        alert('You must be signed in to add entries')
+        console.log('You must be signed in to add entries')
         setLoading(false)
         return
       }
@@ -164,12 +164,12 @@ export default function Vault() {
         setEntries([...entries, result.entry])
         setNewEntry({ site: '', username: '', password: '', notes: '' })
         setShowAddModal(false)
-        alert('Entry added successfully!')
+        console.log('Entry added successfully!')
       } else {
-        alert('Failed to add entry: ' + result.message)
+        console.log('Failed to add entry: ' + result.message)
       }
     } catch (error) {
-      alert('Error: ' + (error instanceof Error ? error.message : 'Unknown error'))
+      console.log('Error: ' + (error instanceof Error ? error.message : 'Unknown error'))
     } finally {
       setLoading(false)
     }
@@ -181,7 +181,7 @@ export default function Vault() {
     setLoading(true)
     try {
       if (!isAuthenticated || !user?.id) {
-        alert('You must be signed in to delete entries')
+        console.log('You must be signed in to delete entries')
         setLoading(false)
         return
       }
@@ -189,12 +189,12 @@ export default function Vault() {
       const result = await conveyor.deleteVaultEntry(user.id, masterPassword, id)
       if (result.success) {
         setEntries(entries.filter((e) => e.id !== id))
-        alert('Entry deleted successfully!')
+        console.log('Entry deleted successfully!')
       } else {
-        alert('Failed to delete: ' + result.message)
+        console.log('Failed to delete: ' + result.message)
       }
     } catch (error) {
-      alert('Error: ' + (error instanceof Error ? error.message : 'Unknown error'))
+      console.log('Error: ' + (error instanceof Error ? error.message : 'Unknown error'))
     } finally {
       setLoading(false)
     }
@@ -208,7 +208,7 @@ export default function Vault() {
 
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text)
-    alert('Copied to clipboard!')
+    console.log('Copied to clipboard!')
   }
 
   // Unlock screen

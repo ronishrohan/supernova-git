@@ -63,7 +63,7 @@ export default function QuickScan() {
       setScanResult(result)
     } catch (error) {
       console.error('Scan error:', error)
-      alert('Scan failed: ' + (error instanceof Error ? error.message : 'Unknown error'))
+      console.log('Scan failed: ' + (error instanceof Error ? error.message : 'Unknown error'))
     } finally {
       setScanning(false)
     }
