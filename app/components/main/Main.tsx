@@ -109,7 +109,7 @@ export default function Main({ children }: { children: React.ReactNode }) {
       <Titlebar>
         <div className="flex size-full overflow-hidden">
           <Sidebar />
-          <div className="size-full overflow-y-auto">{children}</div>
+          <div className="size-full overflow-y-auto overflow-x-hidden">{children}</div>
         </div>
       </Titlebar>
     </div>

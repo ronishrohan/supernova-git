@@ -1,4 +1,4 @@
-import { LayoutDashboard, Sparkles, Asterisk, FileText, Radar, LogOut } from 'lucide-react'
+import { LayoutDashboard, Sparkles, Asterisk, FileText, Radar, Settings, LogOut } from 'lucide-react'
 import React from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { useAuthStore } from '../../store/authStore'
@@ -67,8 +67,13 @@ export default function Sidebar() {
       {/* Spacer to push logout to bottom */}
       <div className="flex-1"></div>
 
-      {/* Bottom section - logout */}
+      {/* Bottom section - settings and logout */}
       <div className="mt-auto">
+        <SidebarButton
+          icon={<Settings strokeWidth={1} size={20} />}
+          isActive={location.pathname === '/settings'}
+          onClick={() => navigate('/settings')}
+        />
         <SidebarButton
           icon={<LogOut strokeWidth={1} size={20} />}
           className="hover:bg-destructive hover:text-red-300"
