@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react'
+import Sidebar from './Sidebar'
 
 interface TitlebarProps {
   children: React.ReactNode
@@ -103,5 +104,14 @@ const Titlebar: React.FC<TitlebarProps> = ({ children }) => {
 }
 
 export default function Main({ children }: { children: React.ReactNode }) {
-  return <Titlebar>{children}</Titlebar>
+  return (
+    <div className="flex flex-col" overflow-hidden size-full>
+      <Titlebar>
+        <div className="flex size-full">
+          <Sidebar />
+          {children}
+        </div>
+      </Titlebar>
+    </div>
+  )
 }
