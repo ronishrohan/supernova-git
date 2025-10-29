@@ -16,6 +16,8 @@ export default function Login() {
           <button className="bg-gradient-to-b transition-all duration-200 hover:brightness-90 cursor-pointer from-accent/60 to-accent/30 shadow-[inset_0_1px_2px_rgba(255,255,255,0.5)] w-full px-4 py-2 ">
             Create an account
           </button>
+          <a href="/test">Go to Test</a>
+          <a href="/blockchain-test">Go to Blockchain Test</a>
         </div>
       </div>
       <div className=" size-full relative">
