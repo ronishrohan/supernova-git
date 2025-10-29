@@ -8,6 +8,8 @@ import Vault from './routes/vault/Vault'
 import Reports from './routes/reports/Reports'
 import QuickScan from './routes/scan/QuickScan'
 import Settings from './routes/settings/Settings'
+import LinkChecker from './routes/link-checker/LinkChecker'
+import EmailAnalyzer from './routes/email-analyzer/EmailAnalyzer'
 import { useAuthStore } from './store/authStore'
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
@@ -52,6 +54,22 @@ export default function App() {
           element={
             <ProtectedRoute>
               <Vault />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/link-checker"
+          element={
+            <ProtectedRoute>
+              <LinkChecker />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/email-analyzer"
+          element={
+            <ProtectedRoute>
+              <EmailAnalyzer />
             </ProtectedRoute>
           }
         />
