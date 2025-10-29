@@ -1,4 +1,5 @@
 /// <reference types="electron-vite/node" />
+/// <reference types="../lib/conveyor/conveyor" />
 
 declare module '*.css' {
   const content: string
