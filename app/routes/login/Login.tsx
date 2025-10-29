@@ -8,13 +8,32 @@ import logo_large from '../../assets/images/icon-large.png'
 export default function Login() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [error, setError] = useState('')
+  const [loading, setLoading] = useState(false)
+  const [isSignup, setIsSignup] = useState(false)
   const navigate = useNavigate()
-  const { login } = useAuthStore()
+  const { login, signup } = useAuthStore()
 
-  const handleLogin = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    await login(email, password)
-    navigate('/dashboard')
+    setError('')
+    setLoading(true)
+
+    try {
+      const result = isSignup
+        ? await signup(email, password)
+        : await login(email, password)
+
+      if (result.error) {
+        setError(result.error)
+      } else {
+        navigate('/dashboard')
+      }
+    } catch (err) {
+      setError('An unexpected error occurred')
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
@@ -26,7 +45,14 @@ export default function Login() {
           </div>
           <div className="text-center text-4xl leading-[20px] font-logo font-light tracking-tighter">SUPERNOVA</div>
           <div className="text-center text-gray-600 mb-4">AI powered security</div>
-          <form onSubmit={handleLogin} className="flex flex-col gap-2">
+
+          {error && (
+            <div className="bg-red-500/10 border border-red-500 text-red-500 px-4 py-2 text-sm">
+              {error}
+            </div>
+          )}
+
+          <form onSubmit={handleSubmit} className="flex flex-col gap-2">
             <input
               type="email"
               placeholder="Email"
@@ -34,6 +60,7 @@ export default function Login() {
               onChange={(e) => setEmail(e.target.value)}
               className="border outline-none focus:border-primary  border-border  px-4 py-2"
               required
+              disabled={loading}
             />
             <input
               type="password"
@@ -42,16 +69,25 @@ export default function Login() {
               onChange={(e) => setPassword(e.target.value)}
               className="border outline-none focus:border-primary border-border  px-4 py-2"
               required
+              disabled={loading}
             />
             <button
               type="submit"
-              className="bg-gradient-to-b transition-all duration-200 hover:brightness-90 cursor-pointer from-primary to-primary/60 shadow-[inset_0_1px_2px_rgba(255,255,255,0.5)] w-full px-4 py-2 "
+              className="bg-gradient-to-b transition-all duration-200 hover:brightness-90 cursor-pointer from-primary to-primary/60 shadow-[inset_0_1px_2px_rgba(255,255,255,0.5)] w-full px-4 py-2 disabled:opacity-50 disabled:cursor-not-allowed"
+              disabled={loading}
             >
-              Login
+              {loading ? (isSignup ? 'Creating account...' : 'Logging in...') : (isSignup ? 'Create Account' : 'Login')}
             </button>
           </form>
-          <button className="bg-gradient-to-b transition-all duration-200 hover:brightness-90 cursor-pointer from-accent/60 to-accent/30 shadow-[inset_0_1px_2px_rgba(255,255,255,0.5)] w-full px-4 py-2 ">
-            Create an account
+          <button
+            onClick={() => {
+              setIsSignup(!isSignup)
+              setError('')
+            }}
+            className="bg-gradient-to-b transition-all duration-200 hover:brightness-90 cursor-pointer from-accent/60 to-accent/30 shadow-[inset_0_1px_2px_rgba(255,255,255,0.5)] w-full px-4 py-2"
+            disabled={loading}
+          >
+            {isSignup ? 'Already have an account? Login' : 'Create an account'}
           </button>
         </div>
       </div>

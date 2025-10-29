@@ -77,9 +77,9 @@ function createGenesisBlock(): Block {
 /**
  * Initialize blockchain
  */
-async function initializeBlockchain(): Promise<void> {
+async function initializeBlockchain(userIdParam?: string): Promise<void> {
   try {
-    const userId = await getUserId()
+    const userId = userIdParam || (await getUserId())
 
     // Try to load existing blockchain from Supabase
     const { data, error } = await supabase
@@ -101,12 +101,12 @@ async function initializeBlockchain(): Promise<void> {
         difficulty: 2 // Number of leading zeros required in hash
       }
 
-      await saveBlockchain()
+      await saveBlockchain(userId)
       console.log('[BLOCKCHAIN] Created new blockchain')
     }
   } catch (error) {
     console.error('[BLOCKCHAIN] Initialization error:', error)
-    // Fallback to empty blockchain
+    // Fallback to empty blockchain (not persisted)
     blockchain = {
       chain: [createGenesisBlock()],
       difficulty: 2
@@ -117,11 +117,11 @@ async function initializeBlockchain(): Promise<void> {
 /**
  * Save blockchain to Supabase
  */
-async function saveBlockchain(): Promise<void> {
+async function saveBlockchain(userIdParam?: string): Promise<void> {
   if (!blockchain) return
 
   try {
-    const userId = await getUserId()
+    const userId = userIdParam || (await getUserId())
 
     const { error } = await supabase.from('blockchain_data').upsert(
       {
@@ -156,9 +156,9 @@ function getLatestBlock(): Block {
 /**
  * Add a new block to the chain
  */
-async function addBlock(dataHash: string): Promise<Block> {
+async function addBlock(dataHash: string, userIdParam?: string): Promise<Block> {
   if (!blockchain) {
-    await initializeBlockchain()
+    await initializeBlockchain(userIdParam)
   }
 
   const previousBlock = getLatestBlock()
@@ -174,7 +174,7 @@ async function addBlock(dataHash: string): Promise<Block> {
   )
 
   blockchain!.chain.push(newBlock)
-  await saveBlockchain()
+  await saveBlockchain(userIdParam)
 
   return newBlock
 }
@@ -244,7 +244,7 @@ function findBlockByDataHash(dataHash: string): Block | null {
  * @param vaultData - The encrypted vault data to store proof for
  * @returns The block that was added to the chain
  */
-export async function storeVaultProof(vaultData: string): Promise<{
+export async function storeVaultProof(vaultData: string, userIdParam?: string): Promise<{
   success: boolean
   block: Block | null
   message: string
@@ -263,8 +263,8 @@ export async function storeVaultProof(vaultData: string): Promise<{
       }
     }
 
-    // Add new block
-    const block = await addBlock(dataHash)
+  // Add new block
+  const block = await addBlock(dataHash, userIdParam)
     console.log('[BLOCKCHAIN] ✅ Proof stored at block', block.index)
 
     return {

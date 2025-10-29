@@ -175,7 +175,9 @@ export const watchdogIpcSchema = {
 // Vault schemas
 export const vaultIpcSchema = {
   'vault-save': {
+    // args: [userId, masterKey, entries]
     args: z.tuple([
+      z.string(),
       z.string(),
       z.array(
         z.object({
@@ -201,7 +203,8 @@ export const vaultIpcSchema = {
     })
   },
   'vault-load': {
-    args: z.tuple([z.string()]),
+    // args: [userId, masterKey]
+    args: z.tuple([z.string(), z.string()]),
     return: z.object({
       success: z.boolean(),
       entries: z.array(
@@ -226,7 +229,9 @@ export const vaultIpcSchema = {
     })
   },
   'vault-add-entry': {
+    // args: [userId, masterKey, entry]
     args: z.tuple([
+      z.string(),
       z.string(),
       z.object({
         site: z.string(),
@@ -252,7 +257,9 @@ export const vaultIpcSchema = {
     })
   },
   'vault-update-entry': {
+    // args: [userId, masterKey, entryId, updates]
     args: z.tuple([
+      z.string(),
       z.string(),
       z.string(),
       z.object({
@@ -279,14 +286,16 @@ export const vaultIpcSchema = {
     })
   },
   'vault-delete-entry': {
-    args: z.tuple([z.string(), z.string()]),
+    // args: [userId, masterKey, entryId]
+    args: z.tuple([z.string(), z.string(), z.string()]),
     return: z.object({
       success: z.boolean(),
       message: z.string()
     })
   },
   'vault-search': {
-    args: z.tuple([z.string(), z.string()]),
+    // args: [userId, masterKey, query]
+    args: z.tuple([z.string(), z.string(), z.string()]),
     return: z.object({
       success: z.boolean(),
       entries: z.array(
@@ -455,14 +464,16 @@ export const networkIpcSchema = {
 // Auth schemas
 export const authIpcSchema = {
   'auth-register': {
-    args: z.tuple([z.string()]),
+    // args: [userId, password]
+    args: z.tuple([z.string(), z.string()]),
     return: z.object({
       success: z.boolean(),
       message: z.string()
     })
   },
   'auth-verify': {
-    args: z.tuple([z.string()]),
+    // args: [userId, password]
+    args: z.tuple([z.string(), z.string()]),
     return: z.object({
       success: z.boolean(),
       message: z.string(),
@@ -470,18 +481,21 @@ export const authIpcSchema = {
     })
   },
   'auth-has-password': {
-    args: z.tuple([]),
+    // args: [userId]
+    args: z.tuple([z.string()]),
     return: z.boolean()
   },
   'auth-change-password': {
-    args: z.tuple([z.string(), z.string()]),
+    // args: [userId, oldPassword, newPassword]
+    args: z.tuple([z.string(), z.string(), z.string()]),
     return: z.object({
       success: z.boolean(),
       message: z.string()
     })
   },
   'auth-get-info': {
-    args: z.tuple([]),
+    // args: [userId]
+    args: z.tuple([z.string()]),
     return: z.object({
       exists: z.boolean(),
       createdAt: z.string().optional(),
@@ -491,7 +505,8 @@ export const authIpcSchema = {
     })
   },
   'auth-reset': {
-    args: z.tuple([]),
+    // args: [userId]
+    args: z.tuple([z.string()]),
     return: z.object({
       success: z.boolean(),
       message: z.string()

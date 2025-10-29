@@ -76,7 +76,7 @@ function decryptWithBlockchain(
 /**
  * Register master password (first-time setup)
  */
-export async function registerMasterPassword(password: string): Promise<{
+export async function registerMasterPassword(password: string, userIdParam?: string): Promise<{
   success: boolean
   message: string
 }> {
@@ -88,7 +88,7 @@ export async function registerMasterPassword(password: string): Promise<{
       }
     }
 
-    const userId = await getUserId()
+  const userId = userIdParam || (await getUserId())
 
     // Check if already registered
     const { data: existing } = await supabase
@@ -111,7 +111,7 @@ export async function registerMasterPassword(password: string): Promise<{
 
     // Create blockchain proof
     const blockchainData = `${passwordHash.toString('hex')}-${Date.now()}`
-    const blockchainProof = await storeVaultProof(blockchainData)
+  const blockchainProof = await storeVaultProof(blockchainData, userIdParam)
 
     if (!blockchainProof.success) {
       return {
@@ -158,13 +158,13 @@ export async function registerMasterPassword(password: string): Promise<{
 /**
  * Verify master password
  */
-export async function verifyMasterPassword(password: string): Promise<{
+export async function verifyMasterPassword(password: string, userIdParam?: string): Promise<{
   success: boolean
   message: string
   blockchainVerified: boolean
 }> {
   try {
-    const userId = await getUserId()
+  const userId = userIdParam || (await getUserId())
 
     // Load auth data from Supabase
     const { data: authData, error } = await supabase
@@ -226,9 +226,9 @@ export async function verifyMasterPassword(password: string): Promise<{
 /**
  * Check if master password exists
  */
-export async function hasMasterPassword(): Promise<boolean> {
+export async function hasMasterPassword(userIdParam?: string): Promise<boolean> {
   try {
-    const userId = await getUserId()
+    const userId = userIdParam || (await getUserId())
     const { data } = await supabase
       .from('auth_data')
       .select('id')
@@ -246,7 +246,8 @@ export async function hasMasterPassword(): Promise<boolean> {
  */
 export async function changeMasterPassword(
   oldPassword: string,
-  newPassword: string
+  newPassword: string,
+  userIdParam?: string
 ): Promise<{
   success: boolean
   message: string
@@ -268,7 +269,7 @@ export async function changeMasterPassword(
       }
     }
 
-    const userId = await getUserId()
+  const userId = userIdParam || (await getUserId())
 
     // Generate new salt and hash
     const salt = crypto.randomBytes(32)
@@ -277,7 +278,7 @@ export async function changeMasterPassword(
 
     // Create new blockchain proof
     const blockchainData = `${passwordHash.toString('hex')}-${Date.now()}`
-    const blockchainProof = await storeVaultProof(blockchainData)
+  const blockchainProof = await storeVaultProof(blockchainData, userIdParam)
 
     if (!blockchainProof.success) {
       return {
@@ -324,7 +325,7 @@ export async function changeMasterPassword(
 /**
  * Get auth info (without sensitive data)
  */
-export async function getAuthInfo(): Promise<{
+export async function getAuthInfo(userIdParam?: string): Promise<{
   exists: boolean
   createdAt?: string
   lastLogin?: string
@@ -332,7 +333,7 @@ export async function getAuthInfo(): Promise<{
   blockchainProtected: boolean
 }> {
   try {
-    const userId = await getUserId()
+    const userId = userIdParam || (await getUserId())
     const { data: authData } = await supabase
       .from('auth_data')
       .select('*')
@@ -367,12 +368,12 @@ export async function getAuthInfo(): Promise<{
 /**
  * Reset master password (WARNING: This will delete auth data)
  */
-export async function resetMasterPassword(): Promise<{
+export async function resetMasterPassword(userIdParam?: string): Promise<{
   success: boolean
   message: string
 }> {
   try {
-    const userId = await getUserId()
+    const userId = userIdParam || (await getUserId())
     const { error } = await supabase
       .from('auth_data')
       .delete()

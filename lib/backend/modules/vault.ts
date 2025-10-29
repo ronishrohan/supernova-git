@@ -101,9 +101,9 @@ function decryptData(encrypted: EncryptedVault, masterPassword: string): string 
 /**
  * Save vault to Supabase
  */
-async function saveVaultToSupabase(encrypted: EncryptedVault): Promise<void> {
+async function saveVaultToSupabase(encrypted: EncryptedVault, userIdParam?: string): Promise<void> {
   try {
-    const userId = await getUserId()
+    const userId = userIdParam || (await getUserId())
 
     // Extract auth tag from data (last 32 hex chars = 16 bytes)
     const authTag = encrypted.data.slice(-32)
@@ -134,9 +134,10 @@ async function saveVaultToSupabase(encrypted: EncryptedVault): Promise<void> {
 /**
  * Load vault from Supabase
  */
-async function loadVaultFromSupabase(): Promise<EncryptedVault | null> {
+async function loadVaultFromSupabase(userIdParam?: string): Promise<EncryptedVault | null> {
   try {
-    const userId = await getUserId()
+    const userId = userIdParam || (await getUserId())
+
     const { data, error } = await supabase
       .from('vault_data')
       .select('*')
@@ -157,6 +158,7 @@ async function loadVaultFromSupabase(): Promise<EncryptedVault | null> {
   } catch {
     return null
   }
+
 }
 
 /**
@@ -164,7 +166,8 @@ async function loadVaultFromSupabase(): Promise<EncryptedVault | null> {
  */
 export async function saveVault(
   masterKey: string,
-  entries: VaultEntry[]
+  entries: VaultEntry[],
+  userIdParam?: string
 ): Promise<{
   success: boolean
   message: string
@@ -190,12 +193,12 @@ export async function saveVault(
     const vaultData = JSON.stringify(entries)
     const encrypted = encryptData(vaultData, masterKey)
 
-    // Save to Supabase
-    await saveVaultToSupabase(encrypted)
+  // Save to Supabase (pass userId from renderer if provided)
+  await saveVaultToSupabase(encrypted, userIdParam)
 
-    // Store blockchain proof
-    const encryptedString = JSON.stringify(encrypted)
-    const proofResult = await storeVaultProof(encryptedString)
+  // Store blockchain proof
+  const encryptedString = JSON.stringify(encrypted)
+  const proofResult = await storeVaultProof(encryptedString, userIdParam)
 
     console.log('[VAULT] ✅ Vault saved successfully')
 
@@ -219,7 +222,7 @@ export async function saveVault(
 /**
  * Load vault entries (verify and decrypt)
  */
-export async function loadVault(masterKey: string): Promise<{
+export async function loadVault(masterKey: string, userIdParam?: string): Promise<{
   success: boolean
   entries: VaultEntry[]
   message: string
@@ -231,7 +234,7 @@ export async function loadVault(masterKey: string): Promise<{
 }> {
   try {
     // Load encrypted vault
-    const encrypted = await loadVaultFromSupabase()
+    const encrypted = await loadVaultFromSupabase(userIdParam)
 
     if (!encrypted) {
       return {
@@ -294,6 +297,7 @@ export async function loadVault(masterKey: string): Promise<{
 export async function addVaultEntry(
   masterKey: string,
   entry: Omit<VaultEntry, 'id' | 'createdAt' | 'updatedAt'>
+  , userIdParam?: string
 ): Promise<{
   success: boolean
   entry?: VaultEntry
@@ -301,7 +305,7 @@ export async function addVaultEntry(
 }> {
   try {
     // Load existing vault
-    const loadResult = await loadVault(masterKey)
+    const loadResult = await loadVault(masterKey, userIdParam)
 
     if (!loadResult.success && loadResult.entries.length === 0 && loadResult.message !== 'No vault found, starting with empty vault') {
       return {
@@ -324,7 +328,7 @@ export async function addVaultEntry(
     entries.push(newEntry)
 
     // Save vault
-    const saveResult = await saveVault(masterKey, entries)
+  const saveResult = await saveVault(masterKey, entries, userIdParam)
 
     if (!saveResult.success) {
       return {
@@ -353,6 +357,7 @@ export async function updateVaultEntry(
   masterKey: string,
   entryId: string,
   updates: Partial<Omit<VaultEntry, 'id' | 'createdAt'>>
+  , userIdParam?: string
 ): Promise<{
   success: boolean
   entry?: VaultEntry
@@ -360,7 +365,7 @@ export async function updateVaultEntry(
 }> {
   try {
     // Load existing vault
-    const loadResult = await loadVault(masterKey)
+    const loadResult = await loadVault(masterKey, userIdParam)
 
     if (!loadResult.success) {
       return {
@@ -391,7 +396,7 @@ export async function updateVaultEntry(
     entries[entryIndex] = updatedEntry
 
     // Save vault
-    const saveResult = await saveVault(masterKey, entries)
+  const saveResult = await saveVault(masterKey, entries, userIdParam)
 
     if (!saveResult.success) {
       return {
@@ -419,13 +424,14 @@ export async function updateVaultEntry(
 export async function deleteVaultEntry(
   masterKey: string,
   entryId: string
+  , userIdParam?: string
 ): Promise<{
   success: boolean
   message: string
 }> {
   try {
     // Load existing vault
-    const loadResult = await loadVault(masterKey)
+    const loadResult = await loadVault(masterKey, userIdParam)
 
     if (!loadResult.success) {
       return {
@@ -449,7 +455,7 @@ export async function deleteVaultEntry(
     entries.splice(entryIndex, 1)
 
     // Save vault
-    const saveResult = await saveVault(masterKey, entries)
+  const saveResult = await saveVault(masterKey, entries, userIdParam)
 
     if (!saveResult.success) {
       return {
@@ -476,13 +482,14 @@ export async function deleteVaultEntry(
 export async function searchVault(
   masterKey: string,
   query: string
+  , userIdParam?: string
 ): Promise<{
   success: boolean
   entries: VaultEntry[]
   message: string
 }> {
   try {
-    const loadResult = await loadVault(masterKey)
+    const loadResult = await loadVault(masterKey, userIdParam)
 
     if (!loadResult.success) {
       return {

@@ -2,6 +2,8 @@ import { resolve } from 'path'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 import { defineConfig, externalizeDepsPlugin } from 'electron-vite'
+import * as fs from 'fs'
+import * as path from 'path'
 
 // Shared alias configuration
 const aliases = {
@@ -9,6 +11,29 @@ const aliases = {
   '@/lib': resolve(__dirname, 'lib'),
   '@/resources': resolve(__dirname, 'resources'),
 }
+
+// Load environment variables from .env.local
+function loadEnvFile(): Record<string, string> {
+  const envPath = path.resolve(__dirname, '.env.local')
+  const env: Record<string, string> = {}
+
+  if (fs.existsSync(envPath)) {
+    const envContent = fs.readFileSync(envPath, 'utf-8')
+    envContent.split('\n').forEach(line => {
+      const trimmed = line.trim()
+      if (trimmed && !trimmed.startsWith('#')) {
+        const [key, ...values] = trimmed.split('=')
+        if (key && values.length > 0) {
+          env[key.trim()] = values.join('=').trim()
+        }
+      }
+    })
+  }
+
+  return env
+}
+
+const env = loadEnvFile()
 
 export default defineConfig({
   main: {
@@ -23,6 +48,10 @@ export default defineConfig({
       alias: aliases,
     },
     plugins: [externalizeDepsPlugin()],
+    define: {
+      'process.env.SUPABASE_URL': JSON.stringify(env.SUPABASE_URL),
+      'process.env.SUPABASE_API_KEY': JSON.stringify(env.SUPABASE_API_KEY),
+    },
   },
   preload: {
     build: {
@@ -50,5 +79,9 @@ export default defineConfig({
       alias: aliases,
     },
     plugins: [tailwindcss(), react()],
+    define: {
+      'process.env.SUPABASE_URL': JSON.stringify(env.SUPABASE_URL),
+      'process.env.SUPABASE_API_KEY': JSON.stringify(env.SUPABASE_API_KEY),
+    },
   },
 })

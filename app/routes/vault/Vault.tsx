@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { Asterisk, Plus, Eye, EyeOff, Copy, Lock, Unlock, Edit2, Trash2, Save, X, Shield, CheckCircle } from 'lucide-react'
 import { useConveyor } from '../../hooks/use-conveyor'
+import { useAuthStore } from '../../store/authStore'
 
 interface VaultEntry {
   id: string
@@ -28,15 +29,22 @@ export default function Vault() {
   // New entry form
   const [newEntry, setNewEntry] = useState({ site: '', username: '', password: '', notes: '' })
 
-  // Check if master password exists on mount
+  const { isAuthenticated, user } = useAuthStore()
+
+  // Check if master password exists on mount (only when authenticated)
   useEffect(() => {
     const checkAuth = async () => {
-      const hasPassword = await conveyor.hasMasterPassword()
+      if (!isAuthenticated || !user?.id) {
+        setHasMasterPassword(false)
+        setIsRegistering(true)
+        return
+      }
+      const hasPassword = await conveyor.hasMasterPassword(user.id)
       setHasMasterPassword(hasPassword)
       setIsRegistering(!hasPassword)
     }
     checkAuth()
-  }, [])
+  }, [isAuthenticated, user])
 
   const handleUnlock = async () => {
     if (!masterPassword) {
@@ -53,7 +61,13 @@ export default function Vault() {
     try {
       // If registering, create new master password
       if (isRegistering) {
-        const registerResult = await conveyor.registerMasterPassword(masterPassword)
+        if (!isAuthenticated || !user?.id) {
+          alert('You must be signed in to register a master password')
+          setLoading(false)
+          return
+        }
+
+        const registerResult = await conveyor.registerMasterPassword(user.id, masterPassword)
         if (!registerResult.success) {
           alert(registerResult.message)
           setLoading(false)
@@ -68,7 +82,13 @@ export default function Vault() {
         alert('Master password registered successfully! Vault is ready to use.')
       } else {
         // Verify existing master password
-        const verifyResult = await conveyor.verifyMasterPassword(masterPassword)
+        if (!isAuthenticated || !user?.id) {
+          alert('You must be signed in to verify master password')
+          setLoading(false)
+          return
+        }
+
+        const verifyResult = await conveyor.verifyMasterPassword(user.id, masterPassword)
         if (!verifyResult.success) {
           alert(verifyResult.message)
           setLoading(false)
@@ -77,7 +97,7 @@ export default function Vault() {
         setBlockchainVerified(verifyResult.blockchainVerified)
 
         // Load vault for existing users
-        const result = await conveyor.loadVault(masterPassword)
+  const result = await conveyor.loadVault(user.id, masterPassword)
 
         if (result.success) {
           setEntries(result.entries)
@@ -105,7 +125,13 @@ export default function Vault() {
   const handleSave = async () => {
     setLoading(true)
     try {
-      const result = await conveyor.saveVault(masterPassword, entries)
+      if (!isAuthenticated || !user?.id) {
+        alert('You must be signed in to save the vault')
+        setLoading(false)
+        return
+      }
+
+      const result = await conveyor.saveVault(user.id, masterPassword, entries)
       if (result.success) {
         setBlockchainVerified(result.blockchainProof?.stored || false)
         alert('Vault saved and verified on blockchain!')
@@ -127,7 +153,13 @@ export default function Vault() {
 
     setLoading(true)
     try {
-      const result = await conveyor.addVaultEntry(masterPassword, newEntry)
+      if (!isAuthenticated || !user?.id) {
+        alert('You must be signed in to add entries')
+        setLoading(false)
+        return
+      }
+
+      const result = await conveyor.addVaultEntry(user.id, masterPassword, newEntry)
       if (result.success && result.entry) {
         setEntries([...entries, result.entry])
         setNewEntry({ site: '', username: '', password: '', notes: '' })
@@ -148,7 +180,13 @@ export default function Vault() {
 
     setLoading(true)
     try {
-      const result = await conveyor.deleteVaultEntry(masterPassword, id)
+      if (!isAuthenticated || !user?.id) {
+        alert('You must be signed in to delete entries')
+        setLoading(false)
+        return
+      }
+
+      const result = await conveyor.deleteVaultEntry(user.id, masterPassword, id)
       if (result.success) {
         setEntries(entries.filter((e) => e.id !== id))
         alert('Entry deleted successfully!')

@@ -37,23 +37,23 @@ export class SecurityApi extends ConveyorApi {
 
   clearAnomalies = () => this.invoke('watchdog-clear-anomalies')
 
-  // Vault methods
-  saveVault = (masterKey: string, entries: any[]) =>
-    this.invoke('vault-save', masterKey, entries)
+  // Vault methods - first arg userId (from useAuthStore in renderer)
+  saveVault = (userId: string, masterKey: string, entries: any[]) =>
+    this.invoke('vault-save', userId, masterKey, entries)
 
-  loadVault = (masterKey: string) => this.invoke('vault-load', masterKey)
+  loadVault = (userId: string, masterKey: string) => this.invoke('vault-load', userId, masterKey)
 
-  addVaultEntry = (masterKey: string, entry: any) =>
-    this.invoke('vault-add-entry', masterKey, entry)
+  addVaultEntry = (userId: string, masterKey: string, entry: any) =>
+    this.invoke('vault-add-entry', userId, masterKey, entry)
 
-  updateVaultEntry = (masterKey: string, entryId: string, updates: any) =>
-    this.invoke('vault-update-entry', masterKey, entryId, updates)
+  updateVaultEntry = (userId: string, masterKey: string, entryId: string, updates: any) =>
+    this.invoke('vault-update-entry', userId, masterKey, entryId, updates)
 
-  deleteVaultEntry = (masterKey: string, entryId: string) =>
-    this.invoke('vault-delete-entry', masterKey, entryId)
+  deleteVaultEntry = (userId: string, masterKey: string, entryId: string) =>
+    this.invoke('vault-delete-entry', userId, masterKey, entryId)
 
-  searchVault = (masterKey: string, query: string) =>
-    this.invoke('vault-search', masterKey, query)
+  searchVault = (userId: string, masterKey: string, query: string) =>
+    this.invoke('vault-search', userId, masterKey, query)
 
   // Reputation methods
   checkUrlReputation = (url: string) => this.invoke('reputation-check-url', url)
@@ -70,17 +70,17 @@ export class SecurityApi extends ConveyorApi {
 
   quickNetworkCheck = () => this.invoke('network-quick-check')
 
-  // Auth methods
-  registerMasterPassword = (password: string) => this.invoke('auth-register', password)
+  // Auth methods - first arg userId
+  registerMasterPassword = (userId: string, password: string) => this.invoke('auth-register', userId, password)
 
-  verifyMasterPassword = (password: string) => this.invoke('auth-verify', password)
+  verifyMasterPassword = (userId: string, password: string) => this.invoke('auth-verify', userId, password)
 
-  hasMasterPassword = () => this.invoke('auth-has-password')
+  hasMasterPassword = (userId: string) => this.invoke('auth-has-password', userId)
 
-  changeMasterPassword = (oldPassword: string, newPassword: string) =>
-    this.invoke('auth-change-password', oldPassword, newPassword)
+  changeMasterPassword = (userId: string, oldPassword: string, newPassword: string) =>
+    this.invoke('auth-change-password', userId, oldPassword, newPassword)
 
-  getAuthInfo = () => this.invoke('auth-get-info')
+  getAuthInfo = (userId: string) => this.invoke('auth-get-info', userId)
 
-  resetMasterPassword = () => this.invoke('auth-reset')
+  resetMasterPassword = (userId: string) => this.invoke('auth-reset', userId)
 }

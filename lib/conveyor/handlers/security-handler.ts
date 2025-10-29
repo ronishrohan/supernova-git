@@ -125,29 +125,29 @@ export const registerSecurityHandlers = () => {
     clearAnomalies()
   })
 
-  // Vault handlers
-  handle('vault-save', async (masterKey: string, entries: any[]) => {
-    return await saveVault(masterKey, entries)
+  // Vault handlers - first arg is userId (passed from renderer/useAuthStore)
+  handle('vault-save', async (userId: string, masterKey: string, entries: any[]) => {
+    return await saveVault(masterKey, entries, userId)
   })
 
-  handle('vault-load', async (masterKey: string) => {
-    return await loadVault(masterKey)
+  handle('vault-load', async (userId: string, masterKey: string) => {
+    return await loadVault(masterKey, userId)
   })
 
-  handle('vault-add-entry', async (masterKey: string, entry: any) => {
-    return await addVaultEntry(masterKey, entry)
+  handle('vault-add-entry', async (userId: string, masterKey: string, entry: any) => {
+    return await addVaultEntry(masterKey, entry, userId)
   })
 
-  handle('vault-update-entry', async (masterKey: string, entryId: string, updates: any) => {
-    return await updateVaultEntry(masterKey, entryId, updates)
+  handle('vault-update-entry', async (userId: string, masterKey: string, entryId: string, updates: any) => {
+    return await updateVaultEntry(masterKey, entryId, updates, userId)
   })
 
-  handle('vault-delete-entry', async (masterKey: string, entryId: string) => {
-    return await deleteVaultEntry(masterKey, entryId)
+  handle('vault-delete-entry', async (userId: string, masterKey: string, entryId: string) => {
+    return await deleteVaultEntry(masterKey, entryId, userId)
   })
 
-  handle('vault-search', async (masterKey: string, query: string) => {
-    return await searchVault(masterKey, query)
+  handle('vault-search', async (userId: string, masterKey: string, query: string) => {
+    return await searchVault(masterKey, query, userId)
   })
 
   // Reputation handlers
@@ -177,29 +177,29 @@ export const registerSecurityHandlers = () => {
     return await quickNetworkCheck()
   })
 
-  // Auth handlers
-  handle('auth-register', async (password: string) => {
-    return await registerMasterPassword(password)
+  // Auth handlers - first arg userId (from renderer)
+  handle('auth-register', async (userId: string, password: string) => {
+    return await registerMasterPassword(password, userId)
   })
 
-  handle('auth-verify', async (password: string) => {
-    return await verifyMasterPassword(password)
+  handle('auth-verify', async (userId: string, password: string) => {
+    return await verifyMasterPassword(password, userId)
   })
 
-  handle('auth-has-password', async () => {
-    return await hasMasterPassword()
+  handle('auth-has-password', async (userId: string) => {
+    return await hasMasterPassword(userId)
   })
 
-  handle('auth-change-password', async (oldPassword: string, newPassword: string) => {
-    return await changeMasterPassword(oldPassword, newPassword)
+  handle('auth-change-password', async (userId: string, oldPassword: string, newPassword: string) => {
+    return await changeMasterPassword(oldPassword, newPassword, userId)
   })
 
-  handle('auth-get-info', async () => {
-    return await getAuthInfo()
+  handle('auth-get-info', async (userId: string) => {
+    return await getAuthInfo(userId)
   })
 
-  handle('auth-reset', async () => {
-    return await resetMasterPassword()
+  handle('auth-reset', async (userId: string) => {
+    return await resetMasterPassword(userId)
   })
 
   console.log('[SECURITY] All security handlers registered')
