@@ -1,7 +1,13 @@
 {
   "permissions": {
     "allow": [
-      "Bash(npx shadcn@latest add:*)"
+      "Bash(npx shadcn@latest add:*)",
+      "Bash(dir /s \"C:\\Users\\Mayur\\Documents\\supernova-git\")",
+      "Bash(tree /F \"C:\\Users\\Mayur\\Documents\\supernova-git\" /L 3)",
+      "Bash(mkdir:*)",
+      "Bash(npm install:*)",
+      "Bash(npm run build:*)",
+      "Bash(cat:*)"
     ],
     "deny": [],
     "ask": []

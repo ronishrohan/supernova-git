@@ -1,11 +1,31 @@
 import { z } from 'zod'
 import { windowIpcSchema } from './window-schema'
 import { appIpcSchema } from './app-schema'
+import {
+  scannerIpcSchema,
+  phishingIpcSchema,
+  advisorIpcSchema,
+  watchdogIpcSchema,
+  vaultIpcSchema,
+  reputationIpcSchema,
+  dashboardIpcSchema,
+  networkIpcSchema,
+  authIpcSchema
+} from './security-schema'
 
 // Define all IPC channel schemas in one place
 export const ipcSchemas = {
   ...windowIpcSchema,
   ...appIpcSchema,
+  ...scannerIpcSchema,
+  ...phishingIpcSchema,
+  ...advisorIpcSchema,
+  ...watchdogIpcSchema,
+  ...vaultIpcSchema,
+  ...reputationIpcSchema,
+  ...dashboardIpcSchema,
+  ...networkIpcSchema,
+  ...authIpcSchema
 } as const
 
 // Extract types from Zod schemas

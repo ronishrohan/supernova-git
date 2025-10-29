@@ -4,6 +4,7 @@ import appIcon from '@/resources/build/icon.png?asset'
 import { registerResourcesProtocol } from './protocols'
 import { registerWindowHandlers } from '@/lib/conveyor/handlers/window-handler'
 import { registerAppHandlers } from '@/lib/conveyor/handlers/app-handler'
+import { registerSecurityHandlers } from '@/lib/conveyor/handlers/security-handler'
 
 export function createAppWindow(): void {
   // Register custom protocol for resources
@@ -31,6 +32,7 @@ export function createAppWindow(): void {
   // Register IPC events for the main window.
   registerWindowHandlers(mainWindow)
   registerAppHandlers(app)
+  registerSecurityHandlers()
 
   mainWindow.on('ready-to-show', () => {
     mainWindow.show()
