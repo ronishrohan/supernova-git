@@ -77,7 +77,11 @@ export const phishingIpcSchema = {
     return: z.object({
       label: z.enum(['safe', 'suspicious', 'malicious']),
       score: z.number(),
-      probabilities: z.record(z.number()),
+      probabilities: z.object({
+        safe: z.number(),
+        suspicious: z.number(),
+        malicious: z.number()
+      }),
       explanation: z.string(),
       features: z.array(z.string())
     })

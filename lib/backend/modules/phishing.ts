@@ -1,3 +1,5 @@
+import { GoogleGenerativeAI } from '@google/generative-ai'
+
 export interface PhishingResult {
   label: 'safe' | 'suspicious' | 'malicious'
   score: number
@@ -262,40 +264,7 @@ function calculateRuleBasedScore(text: string, features: string[]): {
 }
 
 /**
- * ⚠️ ML MODEL PLACEHOLDER ⚠️
- *
- * This is where you'll integrate your trained phishing detection ML model.
- *
- * Expected input: Email text as string
- * Expected output: {
- *   predictions: { safe: number, suspicious: number, malicious: number },
- *   confidence: number,
- *   features: string[]
- * }
- *
- * Example integration:
- * ```typescript
- * import * as tf from '@tensorflow/tfjs-node'
- * import { loadModel } from './your-model-loader'
- *
- * async function predictPhishingModel(text: string) {
- *   const model = await loadModel()
- *   const tokenized = tokenizeText(text)
- *   const tensor = tf.tensor2d([tokenized])
- *   const prediction = await model.predict(tensor)
- *   const probabilities = await prediction.data()
- *
- *   return {
- *     predictions: {
- *       safe: probabilities[0],
- *       suspicious: probabilities[1],
- *       malicious: probabilities[2]
- *     },
- *     confidence: Math.max(...probabilities),
- *     features: extractFeatures(text)
- *   }
- * }
- * ```
+ * Analyze URL for phishing using Gemini AI
  */
 async function predictPhishingModel(
   text: string
@@ -304,26 +273,77 @@ async function predictPhishingModel(
   confidence: number
   features: string[]
 } | null> {
-  // TODO: Replace this with your actual ML model
-  // Uncomment and implement when you have your model ready:
-  //
-  // try {
-  //   const model = await loadYourModel()
-  //   const prediction = await model.predict(text)
-  //   return prediction
-  // } catch (error) {
-  //   console.error('ML model prediction failed:', error)
-  //   return null
-  // }
+  try {
+    const apiKey = "AIzaSyBt-AEd1VmqH7SmG1m1ulJcMmHBbryt89Y"
 
-  return null // Returns null to use rule-based fallback
+    if (!apiKey) {
+      console.error('Gemini API key is not configured')
+      return null
+    }
+
+    const genAI = new GoogleGenerativeAI(apiKey)
+    const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' })
+
+    const systemPrompt = `You are an expert URL and phishing detection analyst. Analyze the provided URL and return ONLY valid JSON (no markdown blocks) with this structure:
+{
+  "predictions": {
+    "safe": number (0-1, probability it's safe),
+    "suspicious": number (0-1, probability it's suspicious),
+    "malicious": number (0-1, probability it's malicious)
+  },
+  "confidence": number (0-1, how confident you are in this prediction),
+  "features": ["feature1", "feature2", "feature3"]
+}
+
+Analyze for phishing indicators including:
+- Suspicious domain names (typosquatting, homograph attacks)
+- URL shorteners or redirects
+- IP addresses instead of domain names
+- Unusual TLDs or suspicious country codes
+- Misspelled brand names
+- Long or obfuscated URLs
+- Non-HTTPS protocol
+- URL structure inconsistencies
+- Known phishing patterns
+- Suspicious subdomains
+
+The probabilities should sum to 1.0. Features should be brief descriptive strings of what you detected.`
+
+    const fullPrompt = `${systemPrompt}\n\nURL to analyze:\n${text}`
+
+    const result = await model.generateContent(fullPrompt)
+    const response = await result.response
+    let jsonText = response.text().trim()
+
+    // Clean markdown if present
+    if (jsonText.startsWith('```json')) {
+      jsonText = jsonText.replace(/```json\n?/g, '').replace(/```\n?$/g, '')
+    } else if (jsonText.startsWith('```')) {
+      jsonText = jsonText.replace(/```\n?/g, '').replace(/```\n?$/g, '')
+    }
+
+    const analysis = JSON.parse(jsonText)
+
+    return {
+      predictions: {
+        safe: Number(analysis.predictions.safe),
+        suspicious: Number(analysis.predictions.suspicious),
+        malicious: Number(analysis.predictions.malicious)
+      },
+      confidence: Number(analysis.confidence),
+      features: analysis.features
+    }
+  } catch (error) {
+    console.error('Gemini AI phishing prediction failed:', error)
+    return null // Falls back to rule-based analysis
+  }
 }
 
 /**
- * Analyze email text for phishing indicators
+ * Analyze URL/text for phishing indicators
  *
- * This function will use your ML model if available, otherwise falls back to
- * rule-based analysis.
+ * This function will use Gemini AI model if available, otherwise falls back to
+ * rule-based analysis. Works with URLs, domains, or any suspicious text.
  */
 export async function analyzeEmail(text: string): Promise<PhishingResult> {
   // Extract features from text

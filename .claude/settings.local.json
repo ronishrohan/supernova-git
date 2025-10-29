@@ -8,7 +8,9 @@
       "Bash(npm install:*)",
       "Bash(npm run build:*)",
       "Bash(cat:*)",
-      "Bash(npm run dev:*)"
+      "Bash(npm run dev:*)",
+      "Bash(dir /s \"E:\\supernova-git\\app\\routes\" /b)",
+      "Bash(npm run:*)"
     ],
     "deny": [],
     "ask": []

@@ -10,6 +10,7 @@ import QuickScan from './routes/scan/QuickScan'
 import Settings from './routes/settings/Settings'
 import LinkChecker from './routes/link-checker/LinkChecker'
 import EmailAnalyzer from './routes/email-analyzer/EmailAnalyzer'
+import PhishingAnalyzer from './routes/phishing/PhishingAnalyzer'
 import { useAuthStore } from './store/authStore'
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
@@ -70,6 +71,14 @@ export default function App() {
           element={
             <ProtectedRoute>
               <EmailAnalyzer />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/phishing"
+          element={
+            <ProtectedRoute>
+              <PhishingAnalyzer />
             </ProtectedRoute>
           }
         />
