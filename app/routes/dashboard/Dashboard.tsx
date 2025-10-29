@@ -1,6 +1,7 @@
 import React from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuthStore } from '../../store/authStore'
+import { Radar } from 'lucide-react'
 
 export default function Dashboard() {
   const { user, logout } = useAuthStore()
@@ -26,8 +27,23 @@ export default function Dashboard() {
         </button>
       </div>
 
-      <div className="text-gray-500 text-center mt-20">
-        <p>Dashboard content will be added here...</p>
+      <div className="max-w-4xl mx-auto mt-12">
+        <div className="grid grid-cols-1 gap-4">
+          <button
+            onClick={() => navigate('/scan')}
+            className="bg-card border border-border hover:border-primary transition-all p-8 text-left group"
+          >
+            <div className="flex items-center gap-4">
+              <div className="p-4 bg-primary/10 group-hover:bg-primary/20 transition-all">
+                <Radar className="text-primary" size={48} strokeWidth={1} />
+              </div>
+              <div>
+                <h2 className="text-2xl font-light mb-1">Quick Scan</h2>
+                <p className="text-gray-600">Perform a rapid security scan on your target</p>
+              </div>
+            </div>
+          </button>
+        </div>
       </div>
     </div>
   )

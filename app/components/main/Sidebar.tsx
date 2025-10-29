@@ -1,4 +1,4 @@
-import { LayoutDashboard, Sparkles, Asterisk, FileText, LogOut } from 'lucide-react'
+import { LayoutDashboard, Sparkles, Asterisk, FileText, Radar, LogOut } from 'lucide-react'
 import React from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { useAuthStore } from '../../store/authStore'
@@ -41,6 +41,11 @@ export default function Sidebar() {
           icon={<LayoutDashboard strokeWidth={1} size={20} />}
           isActive={location.pathname === '/dashboard'}
           onClick={() => navigate('/dashboard')}
+        />
+        <SidebarButton
+          icon={<Radar strokeWidth={1} size={20} />}
+          isActive={location.pathname === '/scan'}
+          onClick={() => navigate('/scan')}
         />
         <SidebarButton
           icon={<Sparkles strokeWidth={1} size={20} />}

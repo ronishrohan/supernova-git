@@ -6,6 +6,7 @@ import Dashboard from './routes/dashboard/Dashboard'
 import Agent from './routes/agent/Agent'
 import Vault from './routes/vault/Vault'
 import Reports from './routes/reports/Reports'
+import QuickScan from './routes/scan/QuickScan'
 import { useAuthStore } from './store/authStore'
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
@@ -26,6 +27,14 @@ export default function App() {
           element={
             <ProtectedRoute>
               <Dashboard />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/scan"
+          element={
+            <ProtectedRoute>
+              <QuickScan />
             </ProtectedRoute>
           }
         />
