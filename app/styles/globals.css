@@ -194,7 +194,7 @@
 
 /* Track */
 ::-webkit-scrollbar-track {
-  background: var(--background);
+  background: var(--card);
 }
 
 /* Handle */
