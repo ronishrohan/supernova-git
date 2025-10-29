@@ -156,8 +156,8 @@ export const registerSecurityHandlers = () => {
   })
 
   // Dashboard handlers
-  handle('dashboard-get-snapshot', async () => {
-    return await getDashboardSnapshot()
+  handle('dashboard-get-snapshot', async (userEmail?: string) => {
+    return await getDashboardSnapshot(userEmail)
   })
 
   handle('dashboard-get-alerts', async () => {

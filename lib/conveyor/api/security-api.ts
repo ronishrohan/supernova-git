@@ -59,7 +59,7 @@ export class SecurityApi extends ConveyorApi {
   checkUrlReputation = (url: string) => this.invoke('reputation-check-url', url)
 
   // Dashboard methods
-  getDashboardSnapshot = () => this.invoke('dashboard-get-snapshot')
+  getDashboardSnapshot = (userEmail?: string) => this.invoke('dashboard-get-snapshot', userEmail)
 
   getSecurityAlerts = () => this.invoke('dashboard-get-alerts')
 

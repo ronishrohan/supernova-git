@@ -339,7 +339,7 @@ export const reputationIpcSchema = {
 // Dashboard schemas
 export const dashboardIpcSchema = {
   'dashboard-get-snapshot': {
-    args: z.tuple([]),
+    args: z.tuple([z.string().optional()]),
     return: z.object({
       systemHealth: z.object({
         score: z.number(),
@@ -377,6 +377,14 @@ export const dashboardIpcSchema = {
         avgCpu: z.number(),
         avgMemory: z.number()
       }),
+      breaches: z
+        .object({
+          email: z.string(),
+          breachCount: z.number(),
+          breaches: z.array(z.string()),
+          status: z.string()
+        })
+        .nullable(),
       timestamp: z.string()
     })
   },

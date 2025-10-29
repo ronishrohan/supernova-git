@@ -43,7 +43,20 @@ export interface DashboardSnapshot {
     avgCpu: number
     avgMemory: number
   }
+  breaches: {
+    email: string
+    breachCount: number
+    breaches: string[]
+    status: string
+  } | null
   timestamp: string
+}
+
+export interface BreachCheckResult {
+  email: string
+  breaches: string[]
+  breachCount: number
+  status: string
 }
 
 export interface QuickStats {
@@ -54,9 +67,47 @@ export interface QuickStats {
 }
 
 /**
+ * Check for data breaches using XposedOrNot API
+ */
+export async function checkEmailBreaches(email: string): Promise<BreachCheckResult> {
+  try {
+    const response = await fetch(`https://api.xposedornot.com/v1/check-email/${email}`)
+
+    if (!response.ok) {
+      return {
+        email,
+        breaches: [],
+        breachCount: 0,
+        status: 'error'
+      }
+    }
+
+    const data = await response.json()
+
+    // API returns breaches as nested array: [["Wattpad", "Trello"]]
+    const breachList = data.breaches?.[0] || []
+
+    return {
+      email: data.email || email,
+      breaches: breachList,
+      breachCount: breachList.length,
+      status: data.status || 'success'
+    }
+  } catch (error) {
+    console.error('Error checking email breaches:', error)
+    return {
+      email,
+      breaches: [],
+      breachCount: 0,
+      status: 'error'
+    }
+  }
+}
+
+/**
  * Get comprehensive dashboard snapshot
  */
-export async function getDashboardSnapshot(): Promise<DashboardSnapshot> {
+export async function getDashboardSnapshot(userEmail?: string): Promise<DashboardSnapshot> {
   // Get scan statistics
   const scanStats = await getScanStats()
 
@@ -85,6 +136,18 @@ export async function getDashboardSnapshot(): Promise<DashboardSnapshot> {
 
   // Get blockchain info
   const blockchainInfo = await getBlockchainInfo()
+
+  // Check for data breaches if email provided
+  let breachData = null
+  if (userEmail) {
+    const breachResult = await checkEmailBreaches(userEmail)
+    breachData = {
+      email: breachResult.email,
+      breachCount: breachResult.breachCount,
+      breaches: breachResult.breaches,
+      status: breachResult.status
+    }
+  }
 
   return {
     systemHealth: {
@@ -116,6 +179,7 @@ export async function getDashboardSnapshot(): Promise<DashboardSnapshot> {
       avgCpu: watchdogStats.avgCpu,
       avgMemory: watchdogStats.avgMemory
     },
+    breaches: breachData,
     timestamp: new Date().toISOString()
   }
 }

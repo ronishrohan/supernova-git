@@ -10,7 +10,9 @@ import {
   TrendingUp,
   Cpu,
   HardDrive,
-  Network
+  Network,
+  Mail,
+  Database
 } from 'lucide-react'
 import { useConveyor } from '../../hooks/use-conveyor'
 
@@ -37,6 +39,12 @@ interface DashboardData {
   watchdog: {
     criticalAnomalies: number
   }
+  breaches: {
+    email: string
+    breachCount: number
+    breaches: string[]
+    status: string
+  } | null
 }
 
 export default function Dashboard() {
@@ -57,7 +65,7 @@ export default function Dashboard() {
 
   const loadDashboardData = async () => {
     try {
-      const snapshot = await conveyor.getDashboardSnapshot()
+      const snapshot = await conveyor.getDashboardSnapshot(user?.email)
       const securityAlerts = await conveyor.getSecurityAlerts()
 
       setDashboardData(snapshot)
@@ -185,6 +193,75 @@ export default function Dashboard() {
           </p>
         </div>
       </div>
+
+      {/* Data Breach Alert */}
+      {dashboardData?.breaches && dashboardData.breaches.status === 'success' && (
+        <div className="mb-8">
+          <div
+            className={`bg-card border p-6 ${
+              dashboardData.breaches.breachCount > 0
+                ? 'border-orange-500 bg-orange-500/5'
+                : 'border-green-500 bg-green-500/5'
+            }`}
+          >
+            <div className="flex items-start gap-4">
+              <div
+                className={`p-3 ${
+                  dashboardData.breaches.breachCount > 0
+                    ? 'bg-orange-500/20'
+                    : 'bg-green-500/20'
+                }`}
+              >
+                <Database
+                  className={dashboardData.breaches.breachCount > 0 ? 'text-orange-500' : 'text-green-500'}
+                  size={32}
+                  strokeWidth={1.5}
+                />
+              </div>
+              <div className="flex-1">
+                <div className="flex items-center justify-between mb-2">
+                  <h3 className="text-xl font-light">Data Breach Monitor</h3>
+                  <div className="flex items-center gap-2 text-sm text-gray-400">
+                    <Mail size={16} />
+                    <span>{dashboardData.breaches.email}</span>
+                  </div>
+                </div>
+                {dashboardData.breaches.breachCount > 0 ? (
+                  <>
+                    <p className="text-orange-400 font-medium mb-3">
+                      {dashboardData.breaches.breachCount} data breach
+                      {dashboardData.breaches.breachCount !== 1 ? 'es' : ''} detected
+                    </p>
+                    <div className="flex flex-wrap gap-2">
+                      {dashboardData.breaches.breaches.map((breach, index) => (
+                        <span
+                          key={index}
+                          className="px-3 py-1 bg-orange-500/20 border border-orange-500/50 text-orange-300 text-sm"
+                        >
+                          {breach}
+                        </span>
+                      ))}
+                    </div>
+                    <p className="text-xs text-gray-600 mt-3">
+                      Your email was found in {dashboardData.breaches.breachCount} known data breach
+                      {dashboardData.breaches.breachCount !== 1 ? 'es' : ''}. Consider changing your
+                      passwords for these services.
+                    </p>
+                  </>
+                ) : (
+                  <>
+                    <p className="text-green-400 font-medium mb-2">No data breaches detected</p>
+                    <p className="text-xs text-gray-600">
+                      Your email has not been found in any known data breaches. Keep using strong, unique
+                      passwords for each service.
+                    </p>
+                  </>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* System Metrics */}
       <div className="grid grid-cols-3 gap-4 mb-8">
